@@ -121,7 +121,6 @@
 
 <div class="w-full max-w-md">
 
-  <!-- ================= ÉTAPE 1 ================= -->
   <section id="slide-1" class="slide active card p-8 sm:p-10 flex-col items-center text-center gap-6">
     <div class="floaty text-7xl">🐻</div>
     <h1 class="font-title text-2xl sm:text-3xl font-bold text-[#FF3D82] leading-snug">
@@ -139,7 +138,6 @@
     </div>
   </section>
 
-  <!-- ================= ÉTAPE 2 ================= -->
   <section id="slide-2" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
     <div class="floaty text-7xl">🐱💕</div>
     <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82] leading-snug">
@@ -152,7 +150,6 @@
     </button>
   </section>
 
-  <!-- ================= ÉTAPE 3 ================= -->
   <section id="slide-3" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
     <div class="text-6xl">📅🐾</div>
     <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82]">Alors... tu es libre quand ?</h2>
@@ -176,7 +173,6 @@
     </button>
   </section>
 
-  <!-- ================= ÉTAPE 4 ================= -->
   <section id="slide-4" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
     <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82]">On a envie de quoi ? ✨</h2>
     <p class="text-gray-400 font-semibold text-sm -mt-3">choisis l'ambiance</p>
@@ -203,7 +199,6 @@
     </div>
   </section>
 
-  <!-- ================= ÉTAPE 5 ================= -->
   <section id="slide-5" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
     <div class="text-7xl floaty">🐻💗🚗</div>
     <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82] leading-relaxed">
@@ -244,7 +239,10 @@
 
     try{
       await fetch('https://kvdb.io/' + sessionId + '/data', {
-        method: 'POST',
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload)
       });
     }catch(err){
