@@ -243,9 +243,8 @@
     };
 
     try{
-      await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch('https://kvdb.io/' + sessionId + '/data', {
+        method: 'POST',
         body: JSON.stringify(payload)
       });
     }catch(err){

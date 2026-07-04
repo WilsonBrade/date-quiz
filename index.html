@@ -142,15 +142,10 @@
     let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
 
     if(!sessionId){
-      // Première visite : on crée un nouveau blob de session
+      // Première visite : on crée un nouveau "bucket" de session sur kvdb.io
       try{
-        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'waiting' })
-        });
-        const location = res.headers.get('Location');
-        sessionId = location.split('/').pop();
+        const res = await fetch('https://kvdb.io/', { method: 'POST' });
+        sessionId = (await res.text()).trim();
         localStorage.setItem('dateQuizSessionId', sessionId);
         const newUrl = window.location.pathname + '?id=' + sessionId;
         history.replaceState(null, '', newUrl);
@@ -175,8 +170,13 @@
     if(!sessionId) return;
 
     try{
-      const res = await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId);
-      const data = await res.json();
+      const res = await fetch('https://kvdb.io/' + sessionId + '/data');
+      if(res.status === 404){
+        showState(waitingState);
+        return;
+      }
+      const text = await res.text();
+      const data = JSON.parse(text);
 
       if(data.status === 'answered'){
         renderAnswers(data);
