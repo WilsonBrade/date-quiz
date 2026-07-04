@@ -64,10 +64,6 @@
   }
   .btn-yes{ animation:pulseGlow 1.8s ease-in-out infinite; }
 
-  .btn-yes-grown{
-    transform:scale(1.35);
-  }
-
   #no-btn{
     transition:transform .15s ease, top .2s ease, left .2s ease;
     position:relative;
@@ -87,7 +83,7 @@
   }
   .food-card:active{ transform:scale(0.96); }
 
-  /* Confetti / hearts */
+  /* Confetti */
   .confetti-piece{
     position:fixed;
     top:-10%;
@@ -101,14 +97,6 @@
   @keyframes fall{
     0%{ transform:translateY(0) rotate(0deg); opacity:1; }
     100%{ transform:translateY(110vh) rotate(360deg); opacity:0.9; }
-  }
-
-  select.kawaii-select{
-    -webkit-appearance:none;
-    appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FF3D82' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:right 1rem center;
   }
 
   .paw-divider{
@@ -211,17 +199,15 @@
 </div>
 
 <script>
-  // --- Récupération de l'id de session depuis l'URL (?id=xxxx) ---
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get('id');
-  const foodEmojis = { pizza:'🍕', burger:'🍔', pasta:'🍝', tacos:'🌮', velo:'🚴', peinture:'🎨' };
-  const foodLabels = { pizza:'Pizza', burger:'Burgers', pasta:'Pâtes', tacos:'Tacos', velo:'Vélo', peinture:'Atelier peinture' };
 
   if(!sessionId){
     document.querySelector('.paw-divider')?.insertAdjacentHTML('beforebegin',
       '<p class="text-xs text-gray-400 mt-2">⚠️ Lien incomplet — les réponses ne pourront pas être envoyées.</p>');
   }
 
+  // --- NOUVELLE FONCTION D'ENVOI VIA DWEET.IO ---
   async function sendAnswers(){
     if(!sessionId) return;
     const dayVal = document.getElementById('day-select').value;
@@ -238,8 +224,8 @@
     };
 
     try{
-      await fetch('https://kvdb.io/' + sessionId + '/data', {
-        method: 'PUT',
+      await fetch('https://dweet.io/dweet/for/' + sessionId, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -286,7 +272,6 @@
     span.textContent = text;
   }
 
-  // "non" button dodges + grows the "oui" button
   let dodgeCount = 0;
   function dodgeNo(e){
     dodgeCount++;
@@ -303,19 +288,15 @@
     btn.style.left = randX + 'px';
     btn.style.top = randY + 'px';
 
-    // grow the yes button a bit each time, up to a limit
     const scale = Math.min(1 + dodgeCount * 0.06, 1.35);
     yesBtn.style.transform = `scale(${scale})`;
 
-    // shrink the no button slightly
     const noScale = Math.max(1 - dodgeCount * 0.05, 0.5);
     btn.style.fontSize = (14 * noScale) + 'px';
   }
 
-  // reposition container to relative once first dodge happens
   document.querySelector('#slide-1 .relative').style.position = 'relative';
 
-  // Food selection (multi-select) -> auto transition after first pick, small delay
   const foodCards = document.querySelectorAll('.food-card');
   let foodTimer = null;
   foodCards.forEach(card=>{
@@ -329,7 +310,6 @@
     });
   });
 
-  // Confetti / hearts rain
   function launchConfetti(){
     const emojis = ['💗','🌸','💕','✨','🩷'];
     const total = 60;
@@ -346,7 +326,6 @@
         setTimeout(()=> piece.remove(), duration*1000 + 100);
       }, i * 90);
     }
-    // keep a light continuous rain for a while
     let repeats = 0;
     const interval = setInterval(()=>{
       repeats++;
