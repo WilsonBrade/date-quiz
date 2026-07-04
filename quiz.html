@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💌 Résultats du Date Quiz</title>
+<title>🌸 Date Quiz 🌸</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --pink-bg:#FFEBF0;
+    --pink-main:#FF6FA5;
     --pink-dark:#FF3D82;
     --pink-pale:#FFD6E5;
   }
@@ -17,6 +18,7 @@
     height:100%;
     font-family:'Nunito','Quicksand',sans-serif;
     background:var(--pink-bg);
+    overscroll-behavior:none;
   }
   body{
     background-image:
@@ -25,216 +27,343 @@
       radial-gradient(circle at 90% 10%, #FFF0F5 0%, transparent 30%);
   }
   .font-title{ font-family:'Quicksand', sans-serif; }
+
   .card{
     background:#fff;
     border-radius:2.5rem;
     box-shadow:0 20px 45px -15px rgba(255,61,130,0.25), 0 0 0 6px #ffffffaa inset;
   }
+
+  /* Fade transitions */
+  .slide{
+    display:none;
+    opacity:0;
+    transform:translateY(12px) scale(0.98);
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .slide.active{
+    display:flex;
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+  .slide.fading-out{
+    opacity:0;
+    transform:translateY(-8px) scale(0.98);
+  }
+
+  /* Floating bear bounce */
   @keyframes floaty{
     0%,100%{ transform:translateY(0) rotate(-2deg); }
     50%{ transform:translateY(-10px) rotate(2deg); }
   }
   .floaty{ animation:floaty 3s ease-in-out infinite; display:inline-block; }
-  .spin{
-    animation:spin 1s linear infinite;
+
+  @keyframes pulseGlow{
+    0%,100%{ box-shadow:0 8px 25px -5px rgba(255,61,130,0.55); transform:scale(1); }
+    50%{ box-shadow:0 8px 35px -2px rgba(255,61,130,0.75); transform:scale(1.03); }
   }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-  .food-pill{
+  .btn-yes{ animation:pulseGlow 1.8s ease-in-out infinite; }
+
+  .btn-yes-grown{
+    transform:scale(1.35);
+  }
+
+  #no-btn{
+    transition:transform .15s ease, top .2s ease, left .2s ease;
+    position:relative;
+  }
+
+  /* Food card selection */
+  .food-card{
+    border:3px solid transparent;
+    transition:all .2s ease;
+    cursor:pointer;
+  }
+  .food-card.selected{
+    border-color:var(--pink-dark);
     background:var(--pink-pale);
-    color:var(--pink-dark);
-    border-radius:9999px;
-    padding:.4rem 1rem;
-    font-weight:700;
-    font-size:.875rem;
+    transform:translateY(-4px) scale(1.03);
+    box-shadow:0 10px 20px -8px rgba(255,61,130,0.45);
   }
-  .copy-flash{
-    animation:flash .6s ease;
+  .food-card:active{ transform:scale(0.96); }
+
+  /* Confetti / hearts */
+  .confetti-piece{
+    position:fixed;
+    top:-10%;
+    z-index:50;
+    pointer-events:none;
+    user-select:none;
+    animation-name:fall;
+    animation-timing-function:linear;
+    animation-iteration-count:1;
   }
-  @keyframes flash{
-    0%{ background:#FF3D82; color:white; }
-    100%{ background:var(--pink-pale); color:var(--pink-dark); }
+  @keyframes fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(110vh) rotate(360deg); opacity:0.9; }
+  }
+
+  select.kawaii-select{
+    -webkit-appearance:none;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FF3D82' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 1rem center;
+  }
+
+  .paw-divider{
+    letter-spacing:0.5em;
+    opacity:0.5;
   }
 </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
 
-<div class="w-full max-w-md card p-8 sm:p-10 flex flex-col items-center text-center gap-5">
+<div class="w-full max-w-md">
 
-  <!-- État : chargement -->
-  <div id="loading-state" class="flex flex-col items-center gap-4">
-    <div class="text-5xl spin">🌸</div>
-    <p class="font-title font-semibold text-[#FF3D82]">Préparation de ton lien...</p>
-  </div>
+  <!-- ================= ÉTAPE 1 ================= -->
+  <section id="slide-1" class="slide active card p-8 sm:p-10 flex-col items-center text-center gap-6">
+    <div class="floaty text-7xl">🐻</div>
+    <h1 class="font-title text-2xl sm:text-3xl font-bold text-[#FF3D82] leading-snug">
+      🌸 Tu veux bien sortir avec moi ? 🌸
+    </h1>
+    <div class="flex flex-col items-center gap-4 w-full mt-2 relative min-h-[120px]">
+      <button id="yes-btn" onclick="goTo(2)"
+        class="btn-yes w-full py-4 rounded-full bg-[#FF3D82] text-white font-title font-bold text-xl shadow-lg hover:bg-[#ff2570] transition-colors">
+        OUI 💗
+      </button>
+      <button id="no-btn" onclick="dodgeNo(event)"
+        class="py-2 px-6 rounded-full bg-[#FFD6E5] text-[#FF3D82] font-title font-semibold text-sm">
+        non 💔
+      </button>
+    </div>
+  </section>
 
-  <!-- État : lien généré, en attente de réponse -->
-  <div id="waiting-state" class="hidden flex-col items-center gap-5 w-full">
-    <div class="text-6xl floaty">📨</div>
-    <h1 class="font-title text-xl font-bold text-[#FF3D82]">Ton lien est prêt !</h1>
-    <p class="text-gray-500 text-sm font-semibold">Envoie ce lien à ta personne 👇</p>
+  <!-- ================= ÉTAPE 2 ================= -->
+  <section id="slide-2" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
+    <div class="floaty text-7xl">🐱💕</div>
+    <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82] leading-snug">
+      ATTENDS, TU AS VRAIMENT DIT OUI ?? 😳
+    </h2>
+    <p class="text-gray-500 font-semibold">J'étais tellement prête à ce que tu dises non 😂</p>
+    <button onclick="goTo(3)"
+      class="mt-2 w-full py-4 rounded-full bg-[#FF3D82] text-white font-title font-bold text-lg shadow-md hover:bg-[#ff2570] transition-colors">
+      Ok ok ! ➡️
+    </button>
+  </section>
 
-    <div class="w-full bg-[#FFF5F8] border-2 border-[#FFD6E5] rounded-2xl px-4 py-3 flex items-center gap-2">
-      <input id="quiz-link" readonly
-        class="flex-1 bg-transparent text-xs sm:text-sm text-gray-600 font-semibold outline-none truncate">
-      <button id="copy-btn" onclick="copyLink()"
-        class="food-pill text-xs whitespace-nowrap">Copier 📋</button>
+  <!-- ================= ÉTAPE 3 ================= -->
+  <section id="slide-3" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
+    <div class="text-6xl">📅🐾</div>
+    <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82]">Alors... tu es libre quand ?</h2>
+
+    <div class="w-full flex flex-col gap-4 text-left mt-2">
+      <div>
+        <label class="font-title font-semibold text-sm text-[#FF3D82] ml-2">Quel jour ? 🌷</label>
+        <input type="date" id="day-select"
+          class="w-full mt-1 py-3 px-4 rounded-2xl bg-[#FFF5F8] border-2 border-[#FFD6E5] font-semibold text-gray-600 focus:outline-none focus:border-[#FF3D82]">
+      </div>
+      <div>
+        <label class="font-title font-semibold text-sm text-[#FF3D82] ml-2">Quelle heure ? 🕰️</label>
+        <input type="time" id="time-select"
+          class="w-full mt-1 py-3 px-4 rounded-2xl bg-[#FFF5F8] border-2 border-[#FFD6E5] font-semibold text-gray-600 focus:outline-none focus:border-[#FF3D82]">
+      </div>
     </div>
 
-    <p class="text-gray-400 text-xs mt-1">🐾 En attente de sa réponse... reviens sur cette page (garde-la en favori) pour voir le résultat.</p>
-
-    <button onclick="checkAnswers()"
-      class="w-full py-3 rounded-full bg-[#FF3D82] text-white font-title font-bold shadow-md hover:bg-[#ff2570] transition-colors">
-      Actualiser 🔄
+    <button onclick="goTo(4)"
+      class="mt-2 w-full py-4 rounded-full bg-[#FF3D82] text-white font-title font-bold text-lg shadow-md hover:bg-[#ff2570] transition-colors">
+      On fixe la date 📍
     </button>
-  </div>
+  </section>
 
-  <!-- État : réponse reçue -->
-  <div id="answered-state" class="hidden flex-col items-center gap-4 w-full">
-    <div class="text-6xl floaty">🎉💗</div>
-    <h1 class="font-title text-xl font-bold text-[#FF3D82]">Elle/Il a répondu !</h1>
+  <!-- ================= ÉTAPE 4 ================= -->
+  <section id="slide-4" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
+    <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82]">On a envie de quoi ? ✨</h2>
+    <p class="text-gray-400 font-semibold text-sm -mt-3">choisis l'ambiance</p>
 
-    <div class="w-full bg-[#FFF5F8] rounded-2xl p-4 flex flex-col gap-3 text-left">
-      <div>
-        <p class="text-xs font-title font-semibold text-gray-400">📅 Jour choisi</p>
-        <p id="res-day" class="font-bold text-[#FF3D82]">—</p>
+    <div class="grid grid-cols-3 gap-3 w-full">
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="pizza">
+        <span class="text-3xl">🍕</span><span class="text-xs font-title font-semibold text-gray-500">Pizza</span>
       </div>
-      <div>
-        <p class="text-xs font-title font-semibold text-gray-400">🕰️ Heure choisie</p>
-        <p id="res-time" class="font-bold text-[#FF3D82]">—</p>
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="burger">
+        <span class="text-3xl">🍔</span><span class="text-xs font-title font-semibold text-gray-500">Burgers</span>
       </div>
-      <div>
-        <p class="text-xs font-title font-semibold text-gray-400 mb-1">🍽️ Envies de nourriture</p>
-        <div id="res-foods" class="flex flex-wrap gap-2"></div>
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="pasta">
+        <span class="text-3xl">🍝</span><span class="text-xs font-title font-semibold text-gray-500">Pâtes</span>
+      </div>
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="tacos">
+        <span class="text-3xl">🌮</span><span class="text-xs font-title font-semibold text-gray-500">Tacos</span>
+      </div>
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="velo">
+        <span class="text-3xl">🚴</span><span class="text-xs font-title font-semibold text-gray-500">Vélo</span>
+      </div>
+      <div class="food-card rounded-2xl bg-[#FFF5F8] py-4 flex flex-col items-center gap-1" data-food="peinture">
+        <span class="text-3xl">🎨</span><span class="text-xs font-title font-semibold text-gray-500">Atelier peinture</span>
       </div>
     </div>
+  </section>
 
-    <button onclick="checkAnswers()"
-      class="w-full py-3 rounded-full bg-[#FFD6E5] text-[#FF3D82] font-title font-bold hover:bg-[#ffc2da] transition-colors">
-      Actualiser 🔄
-    </button>
-  </div>
-
-  <!-- État : erreur -->
-  <div id="error-state" class="hidden flex-col items-center gap-4">
-    <div class="text-5xl">😿</div>
-    <p class="font-title font-semibold text-[#FF3D82]">Oups, impossible de créer le lien.</p>
-    <p class="text-xs text-gray-400">Vérifie ta connexion et recharge la page.</p>
-  </div>
+  <!-- ================= ÉTAPE 5 ================= -->
+  <section id="slide-5" class="slide card p-8 sm:p-10 flex-col items-center text-center gap-5">
+    <div class="text-7xl floaty">🐻💗🚗</div>
+    <h2 class="font-title text-xl sm:text-2xl font-bold text-[#FF3D82] leading-relaxed">
+      contente que tu n'aies pas dit non.<br>
+      sois prêt<span id="final-datetime"></span>, je passe te chercher 🚗
+    </h2>
+    <div class="paw-divider text-2xl">🐾 🐾 🐾</div>
+  </section>
 
 </div>
 
 <script>
+  // --- Récupération de l'id de session depuis l'URL (?id=xxxx) ---
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get('id');
   const foodEmojis = { pizza:'🍕', burger:'🍔', pasta:'🍝', tacos:'🌮', velo:'🚴', peinture:'🎨' };
   const foodLabels = { pizza:'Pizza', burger:'Burgers', pasta:'Pâtes', tacos:'Tacos', velo:'Vélo', peinture:'Atelier peinture' };
 
-  const loadingState = document.getElementById('loading-state');
-  const waitingState = document.getElementById('waiting-state');
-  const answeredState = document.getElementById('answered-state');
-  const errorState = document.getElementById('error-state');
-
-  function showState(el){
-    [loadingState, waitingState, answeredState, errorState].forEach(s => s.classList.add('hidden'));
-    el.classList.remove('hidden');
-    el.classList.add('flex');
+  if(!sessionId){
+    document.querySelector('.paw-divider')?.insertAdjacentHTML('beforebegin',
+      '<p class="text-xs text-gray-400 mt-2">⚠️ Lien incomplet — les réponses ne pourront pas être envoyées.</p>');
   }
 
-  async function init(){
-    const urlParams = new URLSearchParams(window.location.search);
-    let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
-
-    if(!sessionId){
-      // Première visite : on crée un bucket kvdb.io (l'email n'a pas besoin d'être réel)
-      try{
-        const res = await fetch('https://kvdb.io/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'email=datequiz@example.com'
-        });
-        sessionId = (await res.text()).trim();
-        localStorage.setItem('dateQuizSessionId', sessionId);
-        const newUrl = window.location.pathname + '?id=' + sessionId;
-        history.replaceState(null, '', newUrl);
-      }catch(err){
-        console.error(err);
-        showState(errorState);
-        return;
-      }
-    }
-
-    localStorage.setItem('dateQuizSessionId', sessionId);
-    const basePath = window.location.pathname.replace(/index\.html$/, '');
-    const quizUrl = window.location.origin + basePath + 'quiz.html?id=' + sessionId;
-    document.getElementById('quiz-link').value = quizUrl;
-
-    checkAnswers();
-  }
-
-  async function checkAnswers(){
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
+  async function sendAnswers(){
     if(!sessionId) return;
+    const dayVal = document.getElementById('day-select').value;
+    const timeVal = document.getElementById('time-select').value;
+    const selectedFoods = Array.from(document.querySelectorAll('.food-card.selected'))
+      .map(card => card.dataset.food);
+
+    const payload = {
+      status: 'answered',
+      day: dayVal || null,
+      time: timeVal || null,
+      foods: selectedFoods,
+      answeredAt: new Date().toISOString()
+    };
 
     try{
-      const res = await fetch('https://kvdb.io/' + sessionId + '/data');
-      if(res.status === 404){
-        showState(waitingState);
-        return;
-      }
-      const text = await res.text();
-      const data = JSON.parse(text);
-
-      if(data.status === 'answered'){
-        renderAnswers(data);
-        showState(answeredState);
-      }else{
-        showState(waitingState);
-      }
-    }catch(err){
-      console.error(err);
-      showState(waitingState);
-    }
-  }
-
-  function renderAnswers(data){
-    document.getElementById('res-day').textContent = data.day
-      ? new Date(data.day + 'T00:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
-      : 'Non précisé';
-    document.getElementById('res-time').textContent = data.time
-      ? data.time.replace(':','h')
-      : 'Non précisé';
-
-    const foodsContainer = document.getElementById('res-foods');
-    foodsContainer.innerHTML = '';
-    if(data.foods && data.foods.length){
-      data.foods.forEach(f=>{
-        const pill = document.createElement('span');
-        pill.className = 'food-pill';
-        pill.textContent = (foodEmojis[f] || '') + ' ' + (foodLabels[f] || f);
-        foodsContainer.appendChild(pill);
+      await fetch('https://kvdb.io/' + sessionId + '/data', {
+        method: 'POST',
+        body: JSON.stringify(payload)
       });
-    }else{
-      foodsContainer.innerHTML = '<span class="text-gray-400 text-sm">Aucune sélectionnée</span>';
+    }catch(err){
+      console.error('Envoi des réponses impossible :', err);
     }
   }
 
-  function copyLink(){
-    const input = document.getElementById('quiz-link');
-    input.select();
-    navigator.clipboard.writeText(input.value).then(()=>{
-      const btn = document.getElementById('copy-btn');
-      const original = btn.textContent;
-      btn.textContent = 'Copié ! ✅';
-      btn.classList.add('copy-flash');
-      setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copy-flash'); }, 1500);
+  const slides = document.querySelectorAll('.slide');
+
+  function goTo(n){
+    const current = document.querySelector('.slide.active');
+    const next = document.getElementById('slide-' + n);
+    if(!current || !next) return;
+
+    current.classList.add('fading-out');
+    setTimeout(()=>{
+      current.classList.remove('active','fading-out');
+      next.classList.add('active');
+      if(n === 5){
+        fillFinalDateTime();
+        launchConfetti();
+        sendAnswers();
+      }
+    }, 400);
+  }
+
+  function fillFinalDateTime(){
+    const dayVal = document.getElementById('day-select').value;
+    const timeVal = document.getElementById('time-select').value;
+    const span = document.getElementById('final-datetime');
+    let text = '';
+
+    if(dayVal){
+      const d = new Date(dayVal + 'T00:00:00');
+      const formatted = d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+      text += ' le ' + formatted;
+    }
+    if(timeVal){
+      text += ' à ' + timeVal.replace(':','h');
+    }
+    span.textContent = text;
+  }
+
+  // "non" button dodges + grows the "oui" button
+  let dodgeCount = 0;
+  function dodgeNo(e){
+    dodgeCount++;
+    const btn = document.getElementById('no-btn');
+    const yesBtn = document.getElementById('yes-btn');
+    const container = btn.parentElement;
+
+    const maxX = container.clientWidth - btn.offsetWidth - 10;
+    const maxY = container.clientHeight - btn.offsetHeight - 10;
+    const randX = Math.random() * maxX;
+    const randY = Math.random() * maxY;
+
+    btn.style.position = 'absolute';
+    btn.style.left = randX + 'px';
+    btn.style.top = randY + 'px';
+
+    // grow the yes button a bit each time, up to a limit
+    const scale = Math.min(1 + dodgeCount * 0.06, 1.35);
+    yesBtn.style.transform = `scale(${scale})`;
+
+    // shrink the no button slightly
+    const noScale = Math.max(1 - dodgeCount * 0.05, 0.5);
+    btn.style.fontSize = (14 * noScale) + 'px';
+  }
+
+  // reposition container to relative once first dodge happens
+  document.querySelector('#slide-1 .relative').style.position = 'relative';
+
+  // Food selection (multi-select) -> auto transition after first pick, small delay
+  const foodCards = document.querySelectorAll('.food-card');
+  let foodTimer = null;
+  foodCards.forEach(card=>{
+    card.addEventListener('click', ()=>{
+      card.classList.toggle('selected');
+      const anySelected = document.querySelector('.food-card.selected');
+      if(anySelected){
+        clearTimeout(foodTimer);
+        foodTimer = setTimeout(()=> goTo(5), 700);
+      }
     });
-  }
+  });
 
-  init();
-  // Rafraîchissement automatique léger toutes les 8s tant qu'on attend
-  setInterval(()=>{
-    if(!waitingState.classList.contains('hidden')){
-      checkAnswers();
+  // Confetti / hearts rain
+  function launchConfetti(){
+    const emojis = ['💗','🌸','💕','✨','🩷'];
+    const total = 60;
+    for(let i=0;i<total;i++){
+      setTimeout(()=>{
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        piece.style.left = Math.random()*100 + 'vw';
+        piece.style.fontSize = (14 + Math.random()*18) + 'px';
+        const duration = 3 + Math.random()*2.5;
+        piece.style.animationDuration = duration + 's';
+        document.body.appendChild(piece);
+        setTimeout(()=> piece.remove(), duration*1000 + 100);
+      }, i * 90);
     }
-  }, 8000);
+    // keep a light continuous rain for a while
+    let repeats = 0;
+    const interval = setInterval(()=>{
+      repeats++;
+      if(repeats > 12){ clearInterval(interval); return; }
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      piece.style.left = Math.random()*100 + 'vw';
+      piece.style.fontSize = (14 + Math.random()*18) + 'px';
+      const duration = 3 + Math.random()*2.5;
+      piece.style.animationDuration = duration + 's';
+      document.body.appendChild(piece);
+      setTimeout(()=> piece.remove(), duration*1000 + 100);
+    }, 500);
+  }
 </script>
 
 </body>
