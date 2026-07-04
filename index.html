@@ -142,7 +142,7 @@
     let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
 
     if(!sessionId){
-      // Première visite : on crée un bucket kvdb.io (l'email n'a pas besoin d'être réel)
+      
       try{
         const res = await fetch('https://kvdb.io/', {
           method: 'POST',
