@@ -60,13 +60,11 @@
 
 <div class="w-full max-w-md card p-8 sm:p-10 flex flex-col items-center text-center gap-5">
 
-  <!-- État : chargement -->
   <div id="loading-state" class="flex flex-col items-center gap-4">
     <div class="text-5xl spin">🌸</div>
     <p class="font-title font-semibold text-[#FF3D82]">Préparation de ton lien...</p>
   </div>
 
-  <!-- État : lien généré, en attente de réponse -->
   <div id="waiting-state" class="hidden flex-col items-center gap-5 w-full">
     <div class="text-6xl floaty">📨</div>
     <h1 class="font-title text-xl font-bold text-[#FF3D82]">Ton lien est prêt !</h1>
@@ -87,7 +85,6 @@
     </button>
   </div>
 
-  <!-- État : réponse reçue -->
   <div id="answered-state" class="hidden flex-col items-center gap-4 w-full">
     <div class="text-6xl floaty">🎉💗</div>
     <h1 class="font-title text-xl font-bold text-[#FF3D82]">Elle/Il a répondu !</h1>
@@ -113,7 +110,6 @@
     </button>
   </div>
 
-  <!-- État : erreur -->
   <div id="error-state" class="hidden flex-col items-center gap-4">
     <div class="text-5xl">😿</div>
     <p class="font-title font-semibold text-[#FF3D82]">Oups, impossible de créer le lien.</p>
@@ -142,19 +138,29 @@
     let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
 
     if(!sessionId){
-      // Première visite : on crée un bucket kvdb.io (l'email n'a pas besoin d'être réel)
+      // Première visite : on fait un POST vers JSONBlob pour qu'il nous génère un ID officiel
       try{
-        const res = await fetch('https://kvdb.io/', {
+        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'email=datequiz@example.com'
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ status: 'waiting' })
         });
-        sessionId = (await res.text()).trim();
+        
+        // JSONBlob renvoie l'URL du document créé dans le header "Location"
+        const blobUrl = res.headers.get('Location');
+        if (!blobUrl) throw new Error("Impossible de récupérer l'ID généré");
+        
+        // On extrait l'ID à la fin de l'URL renvoyée
+        sessionId = blobUrl.split('/').pop();
+
         localStorage.setItem('dateQuizSessionId', sessionId);
         const newUrl = window.location.pathname + '?id=' + sessionId;
         history.replaceState(null, '', newUrl);
       }catch(err){
-        console.error(err);
+        console.error('Erreur de création:', err);
         showState(errorState);
         return;
       }
@@ -174,13 +180,12 @@
     if(!sessionId) return;
 
     try{
-      const res = await fetch('https://kvdb.io/' + sessionId + '/data');
-      if(res.status === 404){
+      const res = await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId);
+      if(!res.ok){
         showState(waitingState);
         return;
       }
-      const text = await res.text();
-      const data = JSON.parse(text);
+      const data = await res.json();
 
       if(data.status === 'answered'){
         renderAnswers(data);
