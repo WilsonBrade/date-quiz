@@ -142,14 +142,14 @@
     let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
 
     if(!sessionId){
-      // Première visite : on génère un ID nous-mêmes et on crée la ressource via PUT
-      sessionId = 'dq-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+      // Première visite : on crée un bucket kvdb.io (l'email n'a pas besoin d'être réel)
       try{
-        await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'waiting' })
+        const res = await fetch('https://kvdb.io/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'email=datequiz@example.com'
         });
+        sessionId = (await res.text()).trim();
         localStorage.setItem('dateQuizSessionId', sessionId);
         const newUrl = window.location.pathname + '?id=' + sessionId;
         history.replaceState(null, '', newUrl);
@@ -174,12 +174,13 @@
     if(!sessionId) return;
 
     try{
-      const res = await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId);
-      if(!res.ok){
+      const res = await fetch('https://kvdb.io/' + sessionId + '/data');
+      if(res.status === 404){
         showState(waitingState);
         return;
       }
-      const data = await res.json();
+      const text = await res.text();
+      const data = JSON.parse(text);
 
       if(data.status === 'answered'){
         renderAnswers(data);
