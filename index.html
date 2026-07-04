@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💌 Résultats du Date Quiz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink-bg:#FFEBF0;
+    --pink-dark:#FF3D82;
+    --pink-pale:#FFD6E5;
+  }
+  html,body{
+    height:100%;
+    font-family:'Nunito','Quicksand',sans-serif;
+    background:var(--pink-bg);
+  }
+  body{
+    background-image:
+      radial-gradient(circle at 15% 20%, #FFD6E5 0%, transparent 35%),
+      radial-gradient(circle at 85% 80%, #FFD6E5 0%, transparent 35%),
+      radial-gradient(circle at 90% 10%, #FFF0F5 0%, transparent 30%);
+  }
+  .font-title{ font-family:'Quicksand', sans-serif; }
+  .card{
+    background:#fff;
+    border-radius:2.5rem;
+    box-shadow:0 20px 45px -15px rgba(255,61,130,0.25), 0 0 0 6px #ffffffaa inset;
+  }
+  @keyframes floaty{
+    0%,100%{ transform:translateY(0) rotate(-2deg); }
+    50%{ transform:translateY(-10px) rotate(2deg); }
+  }
+  .floaty{ animation:floaty 3s ease-in-out infinite; display:inline-block; }
+  .spin{
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .food-pill{
+    background:var(--pink-pale);
+    color:var(--pink-dark);
+    border-radius:9999px;
+    padding:.4rem 1rem;
+    font-weight:700;
+    font-size:.875rem;
+  }
+  .copy-flash{
+    animation:flash .6s ease;
+  }
+  @keyframes flash{
+    0%{ background:#FF3D82; color:white; }
+    100%{ background:var(--pink-pale); color:var(--pink-dark); }
+  }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+
+<div class="w-full max-w-md card p-8 sm:p-10 flex flex-col items-center text-center gap-5">
+
+  <!-- État : chargement -->
+  <div id="loading-state" class="flex flex-col items-center gap-4">
+    <div class="text-5xl spin">🌸</div>
+    <p class="font-title font-semibold text-[#FF3D82]">Préparation de ton lien...</p>
+  </div>
+
+  <!-- État : lien généré, en attente de réponse -->
+  <div id="waiting-state" class="hidden flex-col items-center gap-5 w-full">
+    <div class="text-6xl floaty">📨</div>
+    <h1 class="font-title text-xl font-bold text-[#FF3D82]">Ton lien est prêt !</h1>
+    <p class="text-gray-500 text-sm font-semibold">Envoie ce lien à ta personne 👇</p>
+
+    <div class="w-full bg-[#FFF5F8] border-2 border-[#FFD6E5] rounded-2xl px-4 py-3 flex items-center gap-2">
+      <input id="quiz-link" readonly
+        class="flex-1 bg-transparent text-xs sm:text-sm text-gray-600 font-semibold outline-none truncate">
+      <button id="copy-btn" onclick="copyLink()"
+        class="food-pill text-xs whitespace-nowrap">Copier 📋</button>
+    </div>
+
+    <p class="text-gray-400 text-xs mt-1">🐾 En attente de sa réponse... reviens sur cette page (garde-la en favori) pour voir le résultat.</p>
+
+    <button onclick="checkAnswers()"
+      class="w-full py-3 rounded-full bg-[#FF3D82] text-white font-title font-bold shadow-md hover:bg-[#ff2570] transition-colors">
+      Actualiser 🔄
+    </button>
+  </div>
+
+  <!-- État : réponse reçue -->
+  <div id="answered-state" class="hidden flex-col items-center gap-4 w-full">
+    <div class="text-6xl floaty">🎉💗</div>
+    <h1 class="font-title text-xl font-bold text-[#FF3D82]">Elle/Il a répondu !</h1>
+
+    <div class="w-full bg-[#FFF5F8] rounded-2xl p-4 flex flex-col gap-3 text-left">
+      <div>
+        <p class="text-xs font-title font-semibold text-gray-400">📅 Jour choisi</p>
+        <p id="res-day" class="font-bold text-[#FF3D82]">—</p>
+      </div>
+      <div>
+        <p class="text-xs font-title font-semibold text-gray-400">🕰️ Heure choisie</p>
+        <p id="res-time" class="font-bold text-[#FF3D82]">—</p>
+      </div>
+      <div>
+        <p class="text-xs font-title font-semibold text-gray-400 mb-1">🍽️ Envies de nourriture</p>
+        <div id="res-foods" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+
+    <button onclick="checkAnswers()"
+      class="w-full py-3 rounded-full bg-[#FFD6E5] text-[#FF3D82] font-title font-bold hover:bg-[#ffc2da] transition-colors">
+      Actualiser 🔄
+    </button>
+  </div>
+
+  <!-- État : erreur -->
+  <div id="error-state" class="hidden flex-col items-center gap-4">
+    <div class="text-5xl">😿</div>
+    <p class="font-title font-semibold text-[#FF3D82]">Oups, impossible de créer le lien.</p>
+    <p class="text-xs text-gray-400">Vérifie ta connexion et recharge la page.</p>
+  </div>
+
+</div>
+
+<script>
+  const foodEmojis = { pizza:'🍕', sushi:'🍣', burger:'🍔', pasta:'🍝', tacos:'🌮', ramen:'🍜' };
+  const foodLabels = { pizza:'Pizza', sushi:'Sushi', burger:'Burgers', pasta:'Pâtes', tacos:'Tacos', ramen:'Ramen' };
+
+  const loadingState = document.getElementById('loading-state');
+  const waitingState = document.getElementById('waiting-state');
+  const answeredState = document.getElementById('answered-state');
+  const errorState = document.getElementById('error-state');
+
+  function showState(el){
+    [loadingState, waitingState, answeredState, errorState].forEach(s => s.classList.add('hidden'));
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+  }
+
+  async function init(){
+    const urlParams = new URLSearchParams(window.location.search);
+    let sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
+
+    if(!sessionId){
+      // Première visite : on crée un nouveau blob de session
+      try{
+        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'waiting' })
+        });
+        const location = res.headers.get('Location');
+        sessionId = location.split('/').pop();
+        localStorage.setItem('dateQuizSessionId', sessionId);
+        const newUrl = window.location.pathname + '?id=' + sessionId;
+        history.replaceState(null, '', newUrl);
+      }catch(err){
+        console.error(err);
+        showState(errorState);
+        return;
+      }
+    }
+
+    localStorage.setItem('dateQuizSessionId', sessionId);
+    const basePath = window.location.pathname.replace(/index\.html$/, '');
+    const quizUrl = window.location.origin + basePath + 'quiz.html?id=' + sessionId;
+    document.getElementById('quiz-link').value = quizUrl;
+
+    checkAnswers();
+  }
+
+  async function checkAnswers(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('id') || localStorage.getItem('dateQuizSessionId');
+    if(!sessionId) return;
+
+    try{
+      const res = await fetch('https://jsonblob.com/api/jsonBlob/' + sessionId);
+      const data = await res.json();
+
+      if(data.status === 'answered'){
+        renderAnswers(data);
+        showState(answeredState);
+      }else{
+        showState(waitingState);
+      }
+    }catch(err){
+      console.error(err);
+      showState(waitingState);
+    }
+  }
+
+  function renderAnswers(data){
+    document.getElementById('res-day').textContent = data.day
+      ? new Date(data.day + 'T00:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
+      : 'Non précisé';
+    document.getElementById('res-time').textContent = data.time
+      ? data.time.replace(':','h')
+      : 'Non précisé';
+
+    const foodsContainer = document.getElementById('res-foods');
+    foodsContainer.innerHTML = '';
+    if(data.foods && data.foods.length){
+      data.foods.forEach(f=>{
+        const pill = document.createElement('span');
+        pill.className = 'food-pill';
+        pill.textContent = (foodEmojis[f] || '') + ' ' + (foodLabels[f] || f);
+        foodsContainer.appendChild(pill);
+      });
+    }else{
+      foodsContainer.innerHTML = '<span class="text-gray-400 text-sm">Aucune sélectionnée</span>';
+    }
+  }
+
+  function copyLink(){
+    const input = document.getElementById('quiz-link');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(()=>{
+      const btn = document.getElementById('copy-btn');
+      const original = btn.textContent;
+      btn.textContent = 'Copié ! ✅';
+      btn.classList.add('copy-flash');
+      setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copy-flash'); }, 1500);
+    });
+  }
+
+  init();
+  // Rafraîchissement automatique léger toutes les 8s tant qu'on attend
+  setInterval(()=>{
+    if(!waitingState.classList.contains('hidden')){
+      checkAnswers();
+    }
+  }, 8000);
+</script>
+
+</body>
+</html>
